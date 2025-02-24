@@ -8,6 +8,7 @@ import schedule
 import time
 import requests
 import matplotlib.dates as mdates
+import os
 
 # ----------------------------------
 # Discord Webhook Configuration
@@ -16,16 +17,26 @@ DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1342868833245073448/JcPb
 
 def send_discord_message(message: str):
     """Send a text message to Discord via webhook."""
-    payload = {
-        "content": message
-    }
+    payload = {"content": message}
     requests.post(DISCORD_WEBHOOK_URL, json=payload)
+
+def send_discord_image(file_path: str, message: str = ""):
+    """Send an image file to Discord via webhook."""
+    url = DISCORD_WEBHOOK_URL
+    data = {"content": message}
+    with open(file_path, "rb") as file:
+        files = {"file": (file_path, file)}
+        response = requests.post(url, data=data, files=files)
+    if response.status_code == 204:
+        print("Image sent successfully!")
+    else:
+        print(f"Failed to send image. Status code: {response.status_code}")
 
 # ----------------------------------
 # Trendline breakout function
 # ----------------------------------
 def trendline_breakout(close: np.array, lookback: int):
-    # Initialize arrays for support trendline and resistance trendline
+    # Initialize arrays for support and resistance trendlines
     s_tl = np.full(len(close), np.nan)
     r_tl = np.full(len(close), np.nan)
 
@@ -49,14 +60,12 @@ def trendline_breakout(close: np.array, lookback: int):
         r_tl[i] = r_val
 
         # 1) Crossing Above Support: Check if the previous close was at or below support and current is above.
-        if i > lookback:
-            if (close[i - 1] <= s_tl[i - 1]) and (close[i] > s_val):
-                buy_sig[i] = 1.0  # Buy signal triggered
+        if i > lookback and (close[i - 1] <= s_tl[i - 1]) and (close[i] > s_val):
+            buy_sig[i] = 1.0  # Buy signal triggered
 
         # 2) Crossing Above Resistance: Check if the previous close was at or below resistance and current is above.
-        if i > lookback:
-            if (close[i - 1] <= r_tl[i - 1]) and (close[i] > r_val):
-                res_break_sig[i] = 1.0
+        if i > lookback and (close[i - 1] <= r_tl[i - 1]) and (close[i] > r_val):
+            res_break_sig[i] = 1.0
 
     return s_tl, r_tl, buy_sig, res_break_sig
 
@@ -72,7 +81,8 @@ symbols = [
 def fetch_and_check_breakouts():
     """
     Loop over the list of symbols, fetch data for each, compute trendlines,
-    detect breakouts on the most recent candle, and send Discord notifications.
+    detect breakouts on the most recent candle, send Discord notifications,
+    plot & save the chart image, and then delete the image.
     """
     exchange = ccxt.binance({'enableRateLimit': True})
     timeframe = '1h'
@@ -106,7 +116,7 @@ def fetch_and_check_breakouts():
             if latest_res_sig == 1.0:
                 messages.append(f"{symbol}: Resistance Breakout detected at {latest_index} (1h)!")
 
-            # Send messages to Discord if any signal is triggered
+            # Send text notifications to Discord if any signal is triggered
             if messages:
                 for msg in messages:
                     send_discord_message(msg)
@@ -115,10 +125,8 @@ def fetch_and_check_breakouts():
                 print(f"{symbol}: No breakout signals at {latest_index}.")
 
             # ----------------------------------
-            # (Optional) Plot and save the chart
+            # Plot and save the chart
             # ----------------------------------
-            # Uncomment the following section if you wish to generate and save a chart.
-            """
             plt.style.use('dark_background')
             fig, ax = plt.subplots(figsize=(12, 6))
             ax.plot(data.index, data['close'], label='Close Price', color='cyan')
@@ -143,10 +151,15 @@ def fetch_and_check_breakouts():
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%M'))
             fig.autofmt_xdate()
 
-            # Save the figure
-            plt.savefig(f"{symbol.replace('/', '_')}_chart.png")
+            chart_filename = f"{symbol.replace('/', '_')}_chart.png"
+            plt.savefig(chart_filename)
             plt.close(fig)
-            """
+
+            # Send the chart image if any breakout signal was triggered, then delete the image
+            if messages:
+                send_discord_image(chart_filename, message=f"Chart for {symbol} Trendline Breakout")
+                os.remove(chart_filename)
+
             # Pause briefly to avoid hitting rate limits
             time.sleep(1)
 
