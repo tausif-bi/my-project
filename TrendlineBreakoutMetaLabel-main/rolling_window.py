@@ -457,7 +457,7 @@ def scheduled_task():
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Running scheduled analysis...")
     run_analysis(
         symbol='BTC/USDT',
-        timeframe='5m',
+        timeframe='1h',
         order=4,
         limit=500,
         show_plot=False,
