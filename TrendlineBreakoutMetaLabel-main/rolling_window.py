@@ -8,9 +8,17 @@ from datetime import datetime, timedelta
 import os
 import schedule
 import requests
+from db_utils import store_signal, get_db_connection
+
 
 # Discord webhook URL - Replace with your actual webhook URL
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1345284439470637079/NU2KogeP-oNzbZhonZ558NMZc2po7O58XXR7gtjM-UKXVFOEWu6Yp5EUxYIT3d0MwISz"
+
+# Define a list of symbols to monitor
+symbols = [
+    'BTC/USDT', 'ETH/USDT', 'XRP/USDT', 'BNB/USDT', 'SOL/USDT', 'ADA/USDT',
+    'TRX/USDT', 'LINK/USDT', 'DOT/USDT'
+]
 
 # Checks if there is a local top detected at curr index
 def rw_top(data: np.array, curr_index: int, order: int) -> bool:
@@ -57,7 +65,7 @@ def rw_extremes(data: np.array, order: int):
     
     return tops, bottoms
 
-def detect_line_crosses(data, resistance_levels, support_levels):
+def detect_line_crosses(data, resistance_levels, support_levels, symbol, timeframe):
     """
     Detect when price crosses any of the support or resistance levels.
     Returns a list of crosses with timestamps, prices, and direction.
@@ -91,6 +99,23 @@ def detect_line_crosses(data, resistance_levels, support_levels):
             if (prev_price <= level and curr_price > level) or (prev_low <= level and curr_low > level):
                 cross_type = "Bullish" if level_type == 'resistance' else "Support bounce"
                 direction = "upward"
+
+                # Signal details text
+                signal_details = f"Recent Line Crosses: [{timestamp}] {cross_type} - Price: {curr_price:.2f} crossed {level_type} at {level:.2f} (upward)"
+        
+                # Store in database
+                store_signal(
+                    symbol=symbol,
+                    timeframe=timeframe,
+                    signal_time=timestamp,
+                    price=curr_price,
+                    signal_type='swing_high_low',
+                    signal_details=signal_details,
+                    direction='upward',
+                    level_value=level,
+                    level_type=level_type,
+                    cross_type=cross_type
+                )
                 crosses.append({
                     'timestamp': timestamp,
                     'price': curr_price,
@@ -105,6 +130,24 @@ def detect_line_crosses(data, resistance_levels, support_levels):
             elif (prev_price >= level and curr_price < level) or (prev_high >= level and curr_high < level):
                 cross_type = "Bearish" if level_type == 'support' else "Resistance rejection"
                 direction = "downward"
+
+                # Signal details text
+                signal_details = f"Recent Line Crosses: [{timestamp}] {cross_type} - Price: {curr_price:.2f} crossed {level_type} at {level:.2f} (downward)"
+        
+                # Store in database
+                store_signal(
+                    symbol=symbol,
+                    timeframe=timeframe,
+                    signal_time=timestamp,
+                    price=curr_price,
+                    signal_type='swing_high_low',
+                    signal_details=signal_details,
+                    direction='downward',
+                    level_value=level,
+                    level_type=level_type,
+                    cross_type=cross_type
+                )
+
                 crosses.append({
                     'timestamp': timestamp,
                     'price': curr_price,
@@ -160,7 +203,7 @@ def live_monitor(symbol, timeframe, order, history_limit=100, update_interval=60
             support_levels = current_support_levels
             
             # Detect crosses
-            crosses = detect_line_crosses(data, resistance_levels, support_levels)
+            crosses = detect_line_crosses(data, resistance_levels, support_levels, symbol, timeframe)
             
             # Only alert for new crosses in the most recent candle
             latest_time = data.index[-1]
@@ -187,7 +230,7 @@ def live_monitor(symbol, timeframe, order, history_limit=100, update_interval=60
     except KeyboardInterrupt:
         print("\nMonitoring stopped.")
 
-def run_analysis(symbol='BTC/USDT', timeframe='5m', order=4, limit=500, show_plot=True, monitor_live=False, send_to_discord=False, zoom_level=20):
+def run_analysis(symbol='BTC/USDT', timeframe='15m', order=4, limit=500, show_plot=True, monitor_live=False, send_to_discord=False, zoom_level=20):
     """
     Run the complete analysis flow - fetch data, identify extremes, plot, and optionally monitor.
     
@@ -233,7 +276,7 @@ def run_analysis(symbol='BTC/USDT', timeframe='5m', order=4, limit=500, show_plo
     support_levels = [bottom[2] for bottom in bottoms]
     
     # Check for recent line crosses
-    recent_crosses = detect_line_crosses(data, resistance_levels, support_levels)
+    recent_crosses = detect_line_crosses(data, resistance_levels, support_levels, symbol, timeframe)
     
     # Show the 10 most recent crosses
     cross_text = ""
@@ -354,7 +397,7 @@ def run_analysis(symbol='BTC/USDT', timeframe='5m', order=4, limit=500, show_plo
         y_min = display_data['close'].min()
         y_max = display_data['close'].max()
         
-        # Add padding (5% of the range)
+        # Add padding (15% of the range)
         padding = (y_max - y_min) * 0.15
         plt.ylim(y_min - padding, y_max + padding)
         
@@ -391,19 +434,50 @@ def run_analysis(symbol='BTC/USDT', timeframe='5m', order=4, limit=500, show_plo
     # Save the figure if sending to Discord
     if send_to_discord:
         # Create directory for images if it doesn't exist
-        os.makedirs("chart_images", exist_ok=True)
+        image_dir = "chart_images"
+        os.makedirs(image_dir, exist_ok=True)
         
-        # Save to file
-        image_path = f"chart_images/{symbol.replace('/', '_')}_{timeframe}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-        plt.savefig(image_path, dpi=120)
-        print(f"Chart saved as {image_path}")
+        # Save to file with more organized naming (keep files organized by date)
+        date_dir = os.path.join(image_dir, datetime.now().strftime('%Y%m%d'))
+        os.makedirs(date_dir, exist_ok=True)
+        
+        relative_image_path = f"{symbol.replace('/', '_')}_{timeframe}_{datetime.now().strftime('%H%M%S')}.png"
+        full_image_path = os.path.join(date_dir, relative_image_path)
+        db_image_path = os.path.join(datetime.now().strftime('%Y%m%d'), relative_image_path)
+        
+        plt.savefig(full_image_path, dpi=120)
+        print(f"Chart saved as {full_image_path}")
+        
+        # For the last few crosses, update the chart image path in the database
+        if recent_crosses:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            try:
+                # Get the most recent crosses (up to 5)
+                recent_cross_times = [cross['timestamp'] for cross in 
+                                    sorted(recent_crosses, key=lambda x: x['timestamp'], reverse=True)[:5]]
+                
+                # Update the image path for these recent signals
+                for cross_time in recent_cross_times:
+                    cursor.execute("""
+                        UPDATE signals 
+                        SET chart_image_path = %s
+                        WHERE symbol = %s AND timeframe = %s AND signal_time = %s AND chart_image_path IS NULL
+                    """, (db_image_path, symbol.replace('/', ''), timeframe, cross_time))
+                
+                conn.commit()
+            except Exception as e:
+                print(f"Error updating chart image paths: {e}")
+            finally:
+                cursor.close()
+                conn.close()
         
         # Send to Discord
-        send_chart_to_discord(image_path, cross_text, symbol, timeframe)
+        send_chart_to_discord(full_image_path, cross_text, symbol, timeframe)
         
-        # Delete the file after sending
-        os.remove(image_path)
-        print(f"Deleted image: {image_path}")
+        # DO NOT delete the file - keep it for the web dashboard
+        print(f"Saved image for web dashboard: {full_image_path}")
     
     # Show the plot if requested
     if show_plot:
@@ -453,11 +527,11 @@ def send_chart_to_discord(image_path, cross_text, symbol, timeframe):
         print(f"Error sending to Discord: {e}")
 
 def scheduled_task():
-    """Function to run on schedule"""
+    """Function to run on schedule for a single symbol"""
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Running scheduled analysis...")
     run_analysis(
         symbol='BTC/USDT',
-        timeframe='1h',
+        timeframe='15m',
         order=4,
         limit=500,
         show_plot=False,
@@ -467,18 +541,42 @@ def scheduled_task():
     )
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Scheduled analysis complete.")
 
+def scheduled_multi_task():
+    """Function to run analysis on multiple symbols"""
+    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Running scheduled multi-symbol analysis...")
+    
+    for symbol in symbols:
+        try:
+            print(f"Processing {symbol}...")
+            run_analysis(
+                symbol=symbol,
+                timeframe='15m',
+                order=4,
+                limit=500,
+                show_plot=False,
+                monitor_live=False,
+                send_to_discord=True,
+                zoom_level=20
+            )
+            # Short pause to avoid rate limits
+            time.sleep(2)
+        except Exception as e:
+            print(f"Error processing {symbol}: {e}")
+    
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Scheduled multi-symbol analysis complete.")
+
 def run_scheduler():
-    """Start the scheduler to run analysis every 5 minutes"""
+    """Start the scheduler to run analysis every hour"""
     print(f"Starting automatic chart generation service - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("Charts will be generated and sent to Discord every 5 minutes.")
+    print("Charts will be generated and sent to Discord every hour.")
     print("Press Ctrl+C to stop the service.")
     print("-" * 80)
     
     # Run once at startup
-    scheduled_task()
+    scheduled_multi_task()  # Use multi-symbol task instead of single
     
-    # Schedule to run every 5 minutes
-    schedule.every(60).minutes.do(scheduled_task)
+    # Schedule to run every hour
+    schedule.every(15).minutes.do(scheduled_multi_task)  # Use multi-symbol task
     
     # Keep the scheduler running
     try:
@@ -493,5 +591,5 @@ if __name__ == "__main__":
     # Uncomment this to show the chart once immediately on your local machine
     # run_analysis(symbol='BTC/USDT', timeframe='5m', order=1, limit=100, show_plot=True)
     
-    # Then start the scheduler for continuous 5-minute runs
+    # Start the scheduler for continuous hourly runs with multiple symbols
     run_scheduler()

@@ -1,0 +1,72 @@
+2025-03-08 20:14:05,923 - trading_signals - INFO - Running all trading strategies
+2025-03-08 20:14:05,923 - trading_signals - INFO - Starting trendline breakout analysis
+2025-03-08 20:14:05,980 - trading_signals - ERROR - Error running trendline breakout: Command '['python', 'trendline_breakout.py', '--store-db', '--timeframe', '5m']' returned non-zero exit status 1.
+2025-03-08 20:14:05,980 - trading_signals - INFO - Starting RSI trendline breakout analysis
+2025-03-08 20:14:06,034 - trading_signals - ERROR - Error running RSI trendline breakout: Command '['python', 'trendline_breakout.py', '--store-db', '--timeframe', '5m']' returned non-zero exit status 1.
+2025-03-08 20:14:06,034 - trading_signals - INFO - Starting rolling window analysis
+2025-03-08 20:14:06,086 - trading_signals - ERROR - Error running rolling window: Command '['python', 'trendline_breakout.py', '--store-db', '--timeframe', '5m']' returned non-zero exit status 1.
+2025-03-08 20:14:06,086 - trading_signals - INFO - All trading strategies completed
+2025-03-08 20:14:06,086 - trading_signals - INFO - Scheduler started. Press Ctrl+C to exit.
+2025-03-08 20:14:38,496 - trading_signals - INFO - Scheduler stopped by user.
+2025-03-08 20:16:34,757 - trading_signals - INFO - Running all trading strategies
+2025-03-08 20:16:34,757 - trading_signals - INFO - Starting trendline breakout analysis
+2025-03-08 20:16:34,806 - trading_signals - ERROR - Error running trendline breakout: Command '['python', 'trendline_breakout.py', '--store-db', '--timeframe', '5m']' returned non-zero exit status 1.
+2025-03-08 20:16:34,807 - trading_signals - INFO - Starting RSI trendline breakout analysis
+2025-03-08 20:16:34,862 - trading_signals - ERROR - Error running RSI trendline breakout: Command '['python', 'rsi_trendline_breakout.py', '--store-db', '--timeframe', '5m']' returned non-zero exit status 1.
+2025-03-08 20:16:34,862 - trading_signals - INFO - Starting rolling window analysis
+2025-03-08 20:16:34,921 - trading_signals - ERROR - Error running rolling window: Command '['python', 'rolling_window.py', '--store-db', '--timeframe', '5m']' returned non-zero exit status 1.
+2025-03-08 20:16:34,922 - trading_signals - INFO - All trading strategies completed
+2025-03-08 20:16:34,922 - trading_signals - INFO - Scheduler started. Press Ctrl+C to exit.
+2025-03-08 20:16:47,843 - trading_signals - INFO - Scheduler stopped by user.
+2025-03-08 20:17:20,278 - trading_signals - INFO - Running all trading strategies
+2025-03-08 20:17:20,278 - trading_signals - INFO - Starting trendline breakout analysis
+2025-03-08 20:17:20,335 - trading_signals - ERROR - Error running trendline breakout: Command '['python', 'trendline_breakout.py']' returned non-zero exit status 1.
+2025-03-08 20:17:20,335 - trading_signals - INFO - Starting RSI trendline breakout analysis
+2025-03-08 20:17:20,390 - trading_signals - ERROR - Error running RSI trendline breakout: Command '['python', 'rsi_trendline_breakout.py']' returned non-zero exit status 1.
+2025-03-08 20:17:20,391 - trading_signals - INFO - Starting rolling window analysis
+2025-03-08 20:17:20,449 - trading_signals - ERROR - Error running rolling window: Command '['python', 'rolling_window.py']' returned non-zero exit status 1.
+2025-03-08 20:17:20,449 - trading_signals - INFO - All trading strategies completed
+2025-03-08 20:17:20,450 - trading_signals - INFO - Scheduler started. Press Ctrl+C to exit.
+2025-03-08 20:17:39,668 - trading_signals - INFO - Scheduler stopped by user.
+2025-03-08 20:17:46,316 - trading_signals - INFO - Running all trading strategies
+2025-03-08 20:17:46,316 - trading_signals - INFO - Starting trendline breakout analysis
+2025-03-08 20:17:46,366 - trading_signals - ERROR - Error running trendline breakout: Command '['python', 'trendline_breakout.py']' returned non-zero exit status 1.
+2025-03-08 20:17:46,367 - trading_signals - INFO - Starting RSI trendline breakout analysis
+2025-03-08 20:17:46,417 - trading_signals - ERROR - Error running RSI trendline breakout: Command '['python', 'rsi_trendline_breakout.py']' returned non-zero exit status 1.
+2025-03-08 20:17:46,417 - trading_signals - INFO - Starting rolling window analysis
+2025-03-08 20:17:46,470 - trading_signals - ERROR - Error running rolling window: Command '['python', 'rolling_window.py']' returned non-zero exit status 1.
+2025-03-08 20:17:46,470 - trading_signals - INFO - All trading strategies completed
+2025-03-08 20:17:46,470 - trading_signals - INFO - Scheduler started. Press Ctrl+C to exit.
+2025-03-08 20:19:17,779 - trading_signals - INFO - Scheduler stopped by user.
+2025-03-09 02:31:08,409 - trading_signals - INFO - Running all trading strategies
+2025-03-09 02:31:08,412 - trading_signals - INFO - Starting trendline breakout analysis
+2025-03-09 02:31:08,467 - trading_signals - ERROR - Error running trendline breakout: Command '['python', 'trendline_breakout.py']' returned non-zero exit status 1.
+2025-03-09 02:31:08,467 - trading_signals - INFO - Starting RSI trendline breakout analysis
+2025-03-09 02:31:08,516 - trading_signals - ERROR - Error running RSI trendline breakout: Command '['python', 'rsi_trendline_breakout.py']' returned non-zero exit status 1.
+2025-03-09 02:31:08,516 - trading_signals - INFO - Starting rolling window analysis
+2025-03-09 02:31:08,572 - trading_signals - ERROR - Error running rolling window: Command '['python', 'rolling_window.py']' returned non-zero exit status 1.
+2025-03-09 02:31:08,572 - trading_signals - INFO - All trading strategies completed
+2025-03-09 02:31:08,573 - trading_signals - INFO - Scheduler started. Press Ctrl+C to exit.
+2025-03-09 02:32:16,925 - trading_signals - INFO - Scheduler stopped by user.
+2025-03-09 02:32:58,758 - trading_signals - INFO - Running all trading strategies
+2025-03-09 02:32:58,758 - trading_signals - INFO - Starting trendline breakout analysis
+2025-03-09 02:32:58,806 - trading_signals - ERROR - Trendline breakout failed with error: Traceback (most recent call last):
+  File "C:\Users\Tausif-Aventador\Trading_AI_Test\TrendlineBreakoutMetaLabel-main\trendline_breakout.py", line 1, in <module>
+    import ccxt
+ModuleNotFoundError: No module named 'ccxt'
+
+2025-03-09 02:32:58,806 - trading_signals - INFO - Starting RSI trendline breakout analysis
+2025-03-09 02:32:58,854 - trading_signals - ERROR - RSI trendline breakout failed with error: Traceback (most recent call last):
+  File "C:\Users\Tausif-Aventador\Trading_AI_Test\TrendlineBreakoutMetaLabel-main\rsi_trendline_breakout.py", line 1, in <module>
+    import ccxt
+ModuleNotFoundError: No module named 'ccxt'
+
+2025-03-09 02:32:58,854 - trading_signals - INFO - Starting rolling window analysis
+2025-03-09 02:32:58,905 - trading_signals - ERROR - Rolling window failed with error: Traceback (most recent call last):
+  File "C:\Users\Tausif-Aventador\Trading_AI_Test\TrendlineBreakoutMetaLabel-main\rolling_window.py", line 1, in <module>
+    import ccxt
+ModuleNotFoundError: No module named 'ccxt'
+
+2025-03-09 02:32:58,905 - trading_signals - INFO - All trading strategies completed
+2025-03-09 02:32:58,905 - trading_signals - INFO - Scheduler started. Press Ctrl+C to exit.
+2025-03-09 02:33:27,088 - trading_signals - INFO - Scheduler stopped by user.

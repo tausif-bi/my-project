@@ -9,6 +9,8 @@ import time
 import requests
 import matplotlib.dates as mdates
 import os
+from db_utils import store_signal, parse_signal_timestamp
+
 
 # ----------------------------------
 # Discord Webhook Configuration
@@ -85,7 +87,7 @@ def fetch_and_check_breakouts():
     plot & save the chart image, and then delete the image.
     """
     exchange = ccxt.binance({'enableRateLimit': True})
-    timeframe = '1h'
+    timeframe = '15m'
     limit = 100
     lookback = 72
 
@@ -112,9 +114,38 @@ def fetch_and_check_breakouts():
 
             messages = []
             if latest_buy_sig == 1.0:
-                messages.append(f"{symbol}: Support Breakout (Buy) detected at {latest_index} (1h)!")
+                signal_msg = f"{symbol}: Support Breakout (Buy) detected at {latest_index} (15m)!"
+                messages.append(signal_msg)
+                # Store in database
+                store_signal(
+                    symbol=symbol,
+                    timeframe=timeframe,
+                    signal_time=latest_index,
+                    price=data['close'].iloc[-1],
+                    signal_type='trendline_breakout',
+                    signal_details=signal_msg,
+                    direction='upward',
+                    level_type='support',
+                    cross_type='Support Breakout',
+                    chart_image_path=chart_filename if chart_filename else None
+                )
             if latest_res_sig == 1.0:
-                messages.append(f"{symbol}: Resistance Breakout detected at {latest_index} (1h)!")
+                signal_msg = f"{symbol}: Resistance Breakout detected at {latest_index} (1h)!"
+                messages.append(signal_msg)
+
+                # Store in database
+                store_signal(
+                    symbol=symbol,
+                    timeframe=timeframe,
+                    signal_time=latest_index,
+                    price=data['close'].iloc[-1],
+                    signal_type='trendline_breakout',
+                    signal_details=signal_msg,
+                    direction='upward',
+                    level_type='resistance',
+                    cross_type='Resistance Breakout',
+                    chart_image_path=chart_filename if chart_filename else None
+                )
 
             # Send text notifications to Discord if any signal is triggered
             if messages:
@@ -169,7 +200,7 @@ def fetch_and_check_breakouts():
 # ----------------------------------
 # Schedule the function to run every 10 minutes
 # ----------------------------------
-schedule.every(10).minutes.do(fetch_and_check_breakouts)
+schedule.every(15).minutes.do(fetch_and_check_breakouts)
 
 # Run once immediately (so you don't wait for the scheduler)
 fetch_and_check_breakouts()
