@@ -587,9 +587,30 @@ def run_scheduler():
         print("\nScheduler stopped by user.")
 
 if __name__ == "__main__":
-    # For a one-time analysis with plot display:
-    # Uncomment this to show the chart once immediately on your local machine
-    # run_analysis(symbol='BTC/USDT', timeframe='5m', order=1, limit=100, show_plot=True)
+    import argparse
+    import sys
     
-    # Start the scheduler for continuous hourly runs with multiple symbols
-    run_scheduler()
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Rolling window support/resistance detection")
+    parser.add_argument("--run-once", action="store_true", help="Run once and exit (for integration)")
+    parser.add_argument("--timeframe", type=str, default="15m", help="Candle timeframe")
+    args = parser.parse_args()
+    
+    # Run once immediately (run multi-symbol task)
+    scheduled_multi_task()
+    
+    # If run-once flag is set, exit after running once
+    if args.run_once:
+        sys.exit(0)
+    
+    # Otherwise, continue with scheduler
+    print("Scheduler started. Press Ctrl+C to exit.")
+    schedule.every(15).minutes.do(scheduled_multi_task)
+    
+    # Keep the script running
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nScheduler stopped by user.")

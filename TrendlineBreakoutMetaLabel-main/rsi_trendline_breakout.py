@@ -17,6 +17,7 @@ from db_utils import store_signal, parse_signal_timestamp
 # ----------------------------------
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1342868833245073448/JcPbZr57wAOneJrKUO0PueBRI0my0SGu7YoIpyhs-5rtRsgTAO6_IcHLR45VqNu9TW8O"
 
+
 def send_discord_message(message: str):
     """Send a text message to Discord via webhook."""
     payload = {"content": message}
@@ -307,4 +308,30 @@ def run_scheduler():
         print("\nDashboard updates stopped.")
 
 if __name__ == "__main__":
-    run_scheduler()
+    import argparse
+    import sys
+    
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="RSI trendline breakout detection")
+    parser.add_argument("--run-once", action="store_true", help="Run once and exit (for integration)")
+    parser.add_argument("--timeframe", type=str, default="15m", help="Candle timeframe")
+    args = parser.parse_args()
+    
+    # Run once immediately
+    create_dashboard()
+    
+    # If run-once flag is set, exit after running once
+    if args.run_once:
+        sys.exit(0)
+    
+    # Otherwise, continue with scheduler
+    print("Dashboard scheduler started. Will update every 15 minutes.")
+    schedule.every(15).minutes.do(create_dashboard)
+    
+    # Keep the script running
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nDashboard updates stopped.")

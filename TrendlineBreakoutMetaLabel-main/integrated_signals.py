@@ -23,11 +23,11 @@ def run_trendline_breakout():
     logger.info("Starting trendline breakout analysis")
     try:
         result = subprocess.run(
-            ["python", "trendline_breakout.py"],
+            ["python", "trendline_breakout.py", "--run-once"],
             capture_output=True, text=True
         )
         if result.returncode == 0:
-            logger.info(f"Trendline breakout completed: {result.stdout}")
+            logger.info(f"Trendline breakout completed successfully")
         else:
             logger.error(f"Trendline breakout failed with error: {result.stderr}")
     except Exception as e:
@@ -38,26 +38,27 @@ def run_rsi_trendline_breakout():
     logger.info("Starting RSI trendline breakout analysis")
     try:
         result = subprocess.run(
-            ["python", "rsi_trendline_breakout.py"],
+            ["python", "rsi_trendline_breakout.py", "--run-once"],
             capture_output=True, text=True
         )
         if result.returncode == 0:
-            logger.info(f"RSI trendline breakout completed: {result.stdout}")
+            logger.info(f"RSI trendline breakout completed successfully")
         else:
             logger.error(f"RSI trendline breakout failed with error: {result.stderr}")
     except Exception as e:
         logger.error(f"Error running RSI trendline breakout: {e}")
+
 
 def run_rolling_window():
     """Run the rolling window script and log results"""
     logger.info("Starting rolling window analysis")
     try:
         result = subprocess.run(
-            ["python", "rolling_window.py"],
+            ["python", "rolling_window.py", "--run-once"],
             capture_output=True, text=True
         )
         if result.returncode == 0:
-            logger.info(f"Rolling window completed: {result.stdout}")
+            logger.info(f"Rolling window completed successfully")
         else:
             logger.error(f"Rolling window failed with error: {result.stderr}")
     except Exception as e:

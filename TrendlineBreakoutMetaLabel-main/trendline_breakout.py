@@ -198,16 +198,32 @@ def fetch_and_check_breakouts():
             print(f"Error processing {symbol}: {e}")
 
 # ----------------------------------
-# Schedule the function to run every 10 minutes
-# ----------------------------------
-schedule.every(15).minutes.do(fetch_and_check_breakouts)
-
-# Run once immediately (so you don't wait for the scheduler)
-fetch_and_check_breakouts()
-
-print("Scheduler started. Press Ctrl+C to exit.")
-
-# Keep the script running indefinitely
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+if __name__ == "__main__":
+    import argparse
+    import sys
+    
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Trendline breakout detection")
+    parser.add_argument("--run-once", action="store_true", help="Run once and exit (for integration)")
+    parser.add_argument("--timeframe", type=str, default="15m", help="Candle timeframe")
+    args = parser.parse_args()
+    
+    # Run once immediately
+    fetch_and_check_breakouts()
+    
+    # If run-once flag is set, exit after running once
+    if args.run_once:
+        sys.exit(0)
+    
+    # Otherwise, set up scheduler to run every 15 minutes
+    schedule.every(15).minutes.do(fetch_and_check_breakouts)
+    
+    print("Scheduler started. Press Ctrl+C to exit.")
+    
+    # Keep the script running indefinitely
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nScheduler stopped.")
